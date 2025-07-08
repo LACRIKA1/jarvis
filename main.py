@@ -56,14 +56,57 @@ def speak(text, print_only=False):
         engine.say(text)
         engine.runAndWait()
 
+class VoiceAssistant:
+    def __init__(self):
+        self.recognizer = sr.Recognizer()
+        self.microphone = sr.Microphone()
+        self._calibrated = False
+
+    def speak(self, text, print_only=False):
+        print(f"[Ассистент]: {text}")
+        if not print_only:
+            engine.say(text)
+            engine.runAndWait()
+
+    def calibrate_once(self):
+        print("🔊 Настройка микрофона... (3 секунды тишины)")
+        with self.microphone as source:
+            self.recognizer.adjust_for_ambient_noise(source, duration=3)
+            self.recognizer.energy_threshold = self.recognizer.energy_threshold * 0.9
+            self.recognizer.dynamic_energy_threshold = False
+        print(f"✅ Калибровка завершена. Порог: {self.recognizer.energy_threshold:.1f}")
+        self._calibrated = True
+
+    def listen(self, timeout=1, phrase_time_limit=2):
+        if not self._calibrated:
+            self.calibrate_once()
+            
+        with self.microphone as source:
+            try:
+                print("🎙️ Говорите...", end='\r', flush=True)
+                audio = self.recognizer.listen(
+                    source,
+                    timeout=timeout,
+                    phrase_time_limit=phrase_time_limit
+                )
+                query = self.recognizer.recognize_google(audio, language="ru-RU")
+                print(f"\n[Вы]: {query}")
+                return query.lower()
+            except sr.WaitTimeoutError:
+                return None
+            except Exception as e:
+                print(f"\n⚠️ Ошибка: {e}")
+                return None
+
 def manage_windows(command):
     try:
         if "запусти deadlock" in command.lower() or "запусти дедлок" in command.lower():
-            os.startfile(f'steam://rungameid/1422450')  # ID Deadlock
+            os.startfile(f'steam://rungameid/1422450')
             speak("Запускаю Deadlock через Steam", print_only=True)
-            time.sleep(10)  # Даем время на запуск
+            time.sleep(10)
             pyautogui.hotkey('alt', 'enter')
             return True
+            
         monitors = pyautogui.getAllWindows()
         
         if len(monitors) < 2:
@@ -71,29 +114,25 @@ def manage_windows(command):
             return False
 
         if "перенеси на второй экран" in command or "перенеси направо" in command:
-            for _ in range(2):  # Двойное нажатие для гарантированного переноса
+            for _ in range(2):
                 pyautogui.hotkey('win', 'shift', 'left')
                 time.sleep(0.2)
             speak("Окно перенесено на первый экран", print_only=True)
             
         elif "перенеси на первый экран" in command or "перенеси налево" in command:
-            # Перемещаем на первый монитор (Win+Shift+Left)
-            
             pyautogui.hotkey('win', 'shift', 'left')
             speak("Окно перенесено на первый экран", print_only=True)
             
         elif "сверни окно" in command or "сверни" in command:
-            # Сворачиваем активное окно (Win+Down)
             pyautogui.hotkey('win', 'down')
             speak("Окно свернуто", print_only=True)
             
         elif "разверни окно" in command or "разверни" in command:
-            # Разворачиваем активное окно (Win+Up)
             pyautogui.hotkey('win', 'up')
             speak("Окно развернуто", print_only=True)
 
         elif "закрой" in command or "закрой окно" in command:
-            pyautogui.hotkey('alt', 'f4')  
+            pyautogui.hotkey('alt', 'f4')
             speak('Окно закрыто')
             
         return True
@@ -101,22 +140,6 @@ def manage_windows(command):
     except Exception as e:
         print(f"Ошибка управления окнами: {e}")
         return False
-
-def listen(timeout=3, phrase_time_limit=3):
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        r.adjust_for_ambient_noise(source, duration=0.5)
-        try:
-            print("Слушаю...", end='\r', flush=True)
-            audio = r.listen(source, timeout=timeout, phrase_time_limit=phrase_time_limit)
-            query = r.recognize_google(audio, language="ru-RU").lower()
-            print(f"[Вы]: {query}")
-            return query
-        except (sr.WaitTimeoutError, sr.UnknownValueError):
-            return None
-        except Exception as e:
-            print(f"Ошибка распознавания: {e}", flush=True)
-            return None
 
 def open_browser(browser_name=None, url=None):
     try:
@@ -216,7 +239,6 @@ def set_volume(level=None, change=None):
 def extract_number(command):
     numbers = re.findall(r'\d+', command)
     return int(numbers[0]) if numbers else None
-
 
 def handle_command(command):
     command = command.lower()
@@ -329,42 +351,36 @@ def handle_command(command):
         print(f"Не распознана команда: {command}", flush=True)
     
     return True
-
+  
 def main():
-    trigger_words = ["джарвес", "jarves", "джарвис"]
-    active = False
+    assistant = VoiceAssistant()
+    trigger_words = ["джарвес","jarves","джарвис"]
     
     speak("Готов к работе! Скажите мое имя для активации")
     
     while True:
         try:
-            query = listen(timeout=1)  # Короткий таймаут для ожидания активации
+            query = assistant.listen()
             
             if query and any(trigger in query for trigger in trigger_words):
-                active = True
-                speak("Да, слушаю вас!")
+                assistant.speak("Да, слушаю вас!")
                 
-            while active:
-                command = listen(phrase_time_limit=5)  # Увеличенный лимит для команд
-                
-                if command:
-                    if any(trigger in command for trigger in trigger_words):
-                        speak("Да, слушаю вас!")
-                        continue
-                        
-                    if not handle_command(command):
-                        active = False
-                        break
-                else:
-                    print("...", end='\r', flush=True)  # Индикатор ожидания без спама в консоль
+                while True:
+                    command = assistant.listen(phrase_time_limit=5)
                     
+                    if command:
+                        if any(trigger in command for trigger in trigger_words):
+                            assistant.speak("Да, слушаю вас!")
+                            continue
+                            
+                        if not handle_command(command):
+                            break
+                    else:
+                        print("...", end='\r', flush=True)
+                        
         except KeyboardInterrupt:
-            speak("Выключаюсь")
+            assistant.speak("Выключаюсь")
             break
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        print(f"Ошибка: {e}")
-        input("Нажмите Enter для выхода...")
+    main()
