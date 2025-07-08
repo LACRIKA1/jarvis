@@ -13,7 +13,7 @@ import screeninfo
 
 # Инициализация голосового движка
 engine = pyttsx3.init()
-engine.setProperty('rate', 180)
+engine.setProperty('rate', 300)
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[0].id)
 steam_path = "C:\\Program Files (x86)\\Steam\\steam.exe"
@@ -61,6 +61,20 @@ class VoiceAssistant:
         self.recognizer = sr.Recognizer()
         self.microphone = sr.Microphone()
         self._calibrated = False
+        self.last_reset = time.time()
+        self.init_components()
+
+    def init_components(self):
+        self.recognizer = sr.Recognizer()
+        self.microphone = sr.Microphone()
+        self.engine = pyttsx3.init()
+        # ... остальная инициализация
+    def check_reset(self):
+        if time.time() - self.last_reset > 3600:  # Каждый час 
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print(f"[DEBUG] Плановый сброс компонентов в {time.strftime('%H:%M:%S')}")
+            self.init_components()
+            self.last_reset = time.time()
 
     def speak(self, text, print_only=False):
         print(f"[Ассистент]: {text}")
@@ -77,26 +91,34 @@ class VoiceAssistant:
         print(f"✅ Калибровка завершена. Порог: {self.recognizer.energy_threshold:.1f}")
         self._calibrated = True
 
-    def listen(self, timeout=1, phrase_time_limit=2):
-        if not self._calibrated:
-            self.calibrate_once()
-            
-        with self.microphone as source:
-            try:
-                print("🎙️ Говорите...", end='\r', flush=True)
-                audio = self.recognizer.listen(
-                    source,
-                    timeout=timeout,
-                    phrase_time_limit=phrase_time_limit
-                )
-                query = self.recognizer.recognize_google(audio, language="ru-RU")
-                print(f"\n[Вы]: {query}")
-                return query.lower()
-            except sr.WaitTimeoutError:
-                return None
-            except Exception as e:
-                print(f"\n⚠️ Ошибка: {e}")
-                return None
+    def listen(self, timeout=1, phrase_time_limit=3):
+        self.check_reset()
+
+        while True:  
+            if not self._calibrated:
+                self.calibrate_once()
+            if self.recognizer is None or random.random() < 0.01:
+                print(f"[DEBUG] Пересоздание распознавателя в {time.strftime('%H:%M:%S')}") 
+                self.recognizer = sr.Recognizer()
+                
+            with self.microphone as source:
+                try:
+                    print("🎙️ Говорите...", end='\r', flush=True)
+                    audio = self.recognizer.listen(
+                        source,
+                        timeout=timeout,
+                        phrase_time_limit=phrase_time_limit
+                    )
+                    query = self.recognizer.recognize_google(audio, language="ru-RU")
+                    print(f"\n[Вы]: {query}")
+                    return query.lower()  
+                    
+                except sr.WaitTimeoutError:
+                    continue  
+                    
+                except Exception as e:
+                    print(f"\n⚠️ Ошибка: {e}")
+                    continue  
 
 def manage_windows(command):
     try:
@@ -355,13 +377,11 @@ def handle_command(command):
 def main():
     assistant = VoiceAssistant()
     trigger_words = ["джарвес","jarves","джарвис"]
-    
-    speak("Готов к работе! Скажите мое имя для активации")
-    
+    speak("Готов к работе! калибровка микрофона ")
+
     while True:
         try:
             query = assistant.listen()
-            
             if query and any(trigger in query for trigger in trigger_words):
                 assistant.speak("Да, слушаю вас!")
                 
@@ -380,7 +400,7 @@ def main():
                         
         except KeyboardInterrupt:
             assistant.speak("Выключаюсь")
-            break
+             
 
 if __name__ == "__main__":
     main()
