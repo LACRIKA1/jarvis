@@ -9,6 +9,7 @@ import os
 import pyautogui
 import psutil
 import re
+import win32gui
 import screeninfo
 
 # Инициализация голосового движка
@@ -134,16 +135,28 @@ def manage_windows(command):
         if len(monitors) < 2:
             speak("У вас только один монитор", print_only=True)
             return False
+        ### ФИКСАНУТЬ ОКНО ПО ЦЕНТРУ
+        
+        def move_window_right():
+            window = win32gui.GetForegroundWindow()
+            rect = win32gui.GetWindowRect(window)
+            width = rect[2] - rect[0]
+            win32gui.MoveWindow(window, rect[0]+1420, rect[1], width, rect[3]-rect[1], True)
+
+        def move_window_left():
+            window = win32gui.GetForegroundWindow()
+            rect = win32gui.GetWindowRect(window)
+            width = rect[2] - rect[0]
+            win32gui.MoveWindow(window, rect[0]-2500, rect[1], width, rect[3]-rect[1], True)
 
         if "перенеси на второй экран" in command or "перенеси направо" in command:
             for _ in range(2):
-                pyautogui.hotkey('win', 'shift', 'left')
-                time.sleep(0.2)
+                move_window_right()
             speak("Окно перенесено на первый экран", print_only=True)
             
-        elif "перенеси на первый экран" in command or "перенеси налево" in command:
-            pyautogui.hotkey('win', 'shift', 'left')
-            speak("Окно перенесено на первый экран", print_only=True)
+        elif "перенеси на левый экран" in command or "перенеси налево" in command:
+            move_window_left()
+            speak("Окно перенесено на второй экран", print_only=True)
             
         elif "сверни окно" in command or "сверни" in command:
             pyautogui.hotkey('win', 'down')
@@ -264,8 +277,6 @@ def extract_number(command):
 
 def handle_command(command):
     command = command.lower()
-    
-    
     # Управление браузерами
     if any(w in command for w in ["открой браузер", "запусти браузер", "открыть браузер"]):
         if "хром" in command or "chrome" in command or "кром" in command:
@@ -294,7 +305,6 @@ def handle_command(command):
         return manage_windows(command)
     elif  "запусти deadlock" in command or "запусти дедлок" in command:
         return manage_windows(command)
-
 
     # Закрытие браузеров
     elif any(w in command for w in ["закрой браузер", "закрыть браузер", "выключи браузер"]):
@@ -397,7 +407,7 @@ def main():
                             break
                     else:
                         print("...", end='\r', flush=True)
-                        
+                 ## НАДО ФИКСАНУТ ВЫХОД       
         except KeyboardInterrupt:
             assistant.speak("Выключаюсь")
              
