@@ -64,6 +64,8 @@ class VoiceAssistant:
         self._calibrated = False
         self.last_reset = time.time()
         self.init_components()
+        self.active = False  # Флаг активного режима
+
 
     def init_components(self):
         self.recognizer = sr.Recognizer()
@@ -278,6 +280,10 @@ def extract_number(command):
 def handle_command(command):
     command = command.lower()
     # Управление браузерами
+    if "выход" in command or "отключись" in command or "спать" in command:
+        speak("Перехожу в режим ожидания", print_only=True)
+        return False  # Выход из активного режима
+
     if any(w in command for w in ["открой браузер", "запусти браузер", "открыть браузер"]):
         if "хром" in command or "chrome" in command or "кром" in command:
             open_browser('chrome')
@@ -288,17 +294,15 @@ def handle_command(command):
         elif "яндекс" in command or "я" in command:
             open_browser('yandex')
         else:
-            # Если просто "открой браузер" без уточнения
             if "браузер" in command:
                 open_browser('chrome')  # По умолчанию открываем Chrome
             else:
-                # Если команда типа "открой chrome"
                 for browser in BROWSERS:
                     if browser in command:
                         open_browser(browser)
                         break
                 else:
-                    open_browser('chrome')  # По умолчанию Chrome
+                    open_browser('chrome') 
     
     #перенос окон
     if any(w in command for w in ["перенеси окно", "сверни окно", "разверни окно", "разверни ок", "сверни ок","перенеси ок", "разверни", "сверни","перенеси","закрой","закрой окно"]):
@@ -386,30 +390,41 @@ def handle_command(command):
   
 def main():
     assistant = VoiceAssistant()
-    trigger_words = ["джарвес","jarves","джарвис"]
-    speak("Готов к работе! калибровка микрофона ")
+    trigger_words = ["джарвес", "jarves", "джарвис"]
+    speak("Готов к работе! Калибровка микрофона...")
+    assistant.calibrate_once()
 
     while True:
         try:
-            query = assistant.listen()
-            if query and any(trigger in query for trigger in trigger_words):
-                assistant.speak("Да, слушаю вас!")
+            # Ожидание активации
+            while True:
+                query = assistant.listen()
+                if query and any(trigger in query for trigger in trigger_words):
+                    assistant.active = True
+                    assistant.speak("Да, слушаю вас!")
+                    break
+                elif query and ("выход" in query or "отключись" in query):
+                    assistant.speak("Я уже в режиме ожидания")
                 
-                while True:
-                    command = assistant.listen(phrase_time_limit=5)
-                    
-                    if command:
-                        if any(trigger in command for trigger in trigger_words):
-                            assistant.speak("Да, слушаю вас!")
-                            continue
-                            
-                        if not handle_command(command):
-                            break
-                    else:
-                        print("...", end='\r', flush=True)
-                 ## НАДО ФИКСАНУТ ВЫХОД       
+            # Активный режим
+            while assistant.active:
+                command = assistant.listen(phrase_time_limit=5)
+                
+                if command:
+                    if any(trigger in command for trigger in trigger_words):
+                        assistant.speak("Да, слушаю вас!")
+                        continue
+                        
+                    if not handle_command(command):
+                        assistant.active = False
+                        break
+                
         except KeyboardInterrupt:
             assistant.speak("Выключаюсь")
+            break
+        except Exception as e:
+            print(f"Ошибка: {e}")
+            continue
              
 
 if __name__ == "__main__":
