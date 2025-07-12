@@ -277,6 +277,16 @@ def extract_number(command):
     numbers = re.findall(r'\d+', command)
     return int(numbers[0]) if numbers else None
 
+def scroll_down(command):
+        scroll_count = extract_number(command) or 3
+        for _ in range(scroll_count):
+            pyautogui.scroll(-200)  # Отрицательное значение - прокрутка вниз
+        
+def scroll_up(command):
+        scroll_count = extract_number(command) or 3
+        for _ in range(scroll_count):
+            pyautogui.scroll(200)  # Отрицательное значение - прокрутка вниз
+
 def handle_command(command):
     command = command.lower()
     # Управление браузерами
@@ -309,6 +319,10 @@ def handle_command(command):
         return manage_windows(command)
     elif  "запусти deadlock" in command or "запусти дедлок" in command:
         return manage_windows(command)
+    elif any(w in command for w in ["вниз","ниже","скролл вниз", "листай вниз", "прокрути ниже"]):
+        scroll_down(command)
+    elif any(w in command for w in ["выше","вверх", "листай выше", "прокрути выше"]):
+        scroll_up(command)
 
     # Закрытие браузеров
     elif any(w in command for w in ["закрой браузер", "закрыть браузер", "выключи браузер"]):
