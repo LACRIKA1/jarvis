@@ -1,0 +1,115 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: rgba(10, 10, 20, 0.9);
+  color: #00ff00;
+  font-family: 'Orbitron', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+  -webkit-app-region: drag;
+}
+
+/* Анимированная градиентная полоса (улучшенная версия) */
+#animated-border {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    #FF69B4,  /* Розовый */
+    #FF8CC3,  /* Светло-розовый */
+    #00BFFF,  /* Голубой */
+    #7CFC00,  /* Зеленый */
+    #00BFFF,  /* Голубой */
+    #FF8CC3,  /* Светло-розовый */
+    #FF69B4); /* Розовый */
+  background-size: 600% 100%;  /* Увеличенный размер для плавности */
+  z-index: 1000;
+  animation: gradient-flow 24s linear infinite;
+  box-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+}
+
+@keyframes gradient-flow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* Остальные стили остаются без изменений */
+#chat-container {
+  height: calc(100vh - 120px);
+  padding: 20px;
+  margin-top: 8px;
+  overflow-y: scroll; 
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+}
+
+
+#chat-container::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  background: transparent;
+}
+
+#chat-container {
+  -webkit-overflow-scrolling: touch;
+}
+
+#input-container {
+  display: flex;
+  padding: 10px;
+  position: fixed;
+  bottom: 0;
+  width: calc(100% - 20px);
+  background: rgba(0, 0, 0, 0.7);
+  -webkit-app-region: no-drag;
+}
+
+#user-input {
+  flex: 1;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #00ff00;
+  color: #00ff00;
+  -webkit-app-region: no-drag;
+}
+
+/* Кнопки */
+#close-btn {
+  position: absolute;
+  top: 15px;
+  right: 10px;
+  background: #ff0000;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  z-index: 1002;
+  -webkit-app-region: no-drag;
+}
+
+#send-btn, #voice-btn {
+  background: rgba(0, 255, 0, 0.2);
+  border: 1px solid #00ff00;
+  color: #00ff00;
+  margin-left: 10px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+/* Сообщения */
+.message {
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.user-message {
+  color: white;
+}
+
+.jarvis-message {
+  color: #00ff00;
+}

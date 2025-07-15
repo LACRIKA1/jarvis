@@ -3,67 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <title>JARVIS Chat</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: rgba(10, 10, 20, 0.9);
-      color: #00ff00;
-      font-family: 'Orbitron', sans-serif;
-      height: 100vh;
-      overflow: hidden;
-    }
-    #chat-container {
-      height: calc(100vh - 120px);
-      padding: 20px;
-      overflow-y: auto;
-    }
-    #input-container {
-      display: flex;
-      padding: 10px;
-      position: fixed;
-      bottom: 0;
-      width: calc(100% - 20px);
-      background: rgba(0, 0, 0, 0.7);
-    }
-    #user-input {
-      flex: 1;
-      padding: 10px;
-      background: rgba(0, 0, 0, 0.5);
-      border: 1px solid #00ff00;
-      color: #00ff00;
-    }
-    #close-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #ff0000;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 25px;
-      height: 25px;
-      cursor: pointer;
-      z-index: 1000;
-    }
-    .message {
-      margin-bottom: 15px;
-    }
-    .user-message {
-      color: white;
-    }
-    .jarvis-message {
-      color: #00ff00;
-    }
-  </style>
+  <link rel="stylesheet" href="chat.css">
   <script>
     const { ipcRenderer } = require('electron')
     window.ipcRenderer = ipcRenderer
   </script>
 </head>
 <body>
+  <!-- Исправлено id на animated-border -->
+  <div id="animated-border"></div>
   <button id="close-btn">×</button>
+  
   <div id="chat-container">
     <div class="message jarvis-message">
       JARVIS: Система активирована. Чем могу помочь?

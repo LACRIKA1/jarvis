@@ -29,7 +29,7 @@ function createWindow() {
     show: false  // Сразу скрываем
   })
   chatWindow.loadFile('chat.html')
-  
+  chatWindow.show()
 ipcMain.on('close-window', (event, windowType) => {
   if (windowType === 'main') {
     mainWindow.close(); // Закрыть приложение
