@@ -1,56 +1,91 @@
+/* Киборг-фон с градиентом и "цифровым шумом" */
 body {
   margin: 0;
   overflow: hidden;
-  background: transparent;
-  font-family: 'Segoe UI', sans-serif;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(255, 0, 255, 0.15), transparent 70%),
+    radial-gradient(circle at 80% 50%, rgba(0, 255, 255, 0.15), transparent 70%),
+    linear-gradient(to bottom, #001a00, #000000);
+  font-family: 'Orbitron', sans-serif;
+  color: #0ff;
 }
 
+/* Контейнер интерфейса */
 #jarvis-ui {
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px);
+  background: rgba(10, 10, 30, 0.7);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  box-shadow: 
+    0 0 20px rgba(0, 255, 255, 0.3),
+    inset 0 0 20px rgba(0, 255, 255, 0.2);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: #00FFAA;
-  border-radius: 15px;
+  position: relative;
 }
 
-#sound-wave {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 30px;
-}
-
-.wave-bar {
-  width: 4px;
-  height: 10px;
-  background: #00FFAA;
-  opacity: 0.7;
-  animation: wave 1s infinite ease-in-out;
-}
-
-@keyframes wave {
-  0%, 100% { height: 10px; }
-  50% { height: 50px; }
+/* Стиль для "глитч-эффекта" */
+#jarvis-ui::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #ff00ff, #00ffff);
+  animation: glitch 3s infinite;
 }
 
 #response {
-  font-size: 24px;
-  text-align: center;
-  margin: 20px;
-  text-shadow: 0 0 10px #00FFAA;
+  color: #00ff44;
+  text-shadow: 
+    0 0 10px #00ff44,
+    0 0 20px rgba(0, 255, 68, 0.5);
+  border-color: #00ff44;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+}
+
+/* Мигающий курсор */
+#response::after {
+  content: "|";
+  animation: blink 1s infinite;
+  margin-left: 5px;
+  transition: all 0.1s ease;
+  will-change: contents;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
 #close-btn {
   position: absolute;
-  top: 15px;
-  right: 15px;
-  background: transparent;
-  border: none;
-  color: red;
-  font-size: 24px;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 0, 0, 0.2);
+  border: 1px solid #f00;
+  color: #f00;
+  font-size: 20px;
   cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#close-btn:hover {
+  background: rgba(255, 0, 0, 0.4);
+  box-shadow: 0 0 15px #f00;
+}
+
+@keyframes glitch {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 0.2; }
 }
