@@ -10,10 +10,20 @@
   <div id="jarvis-ui">
     <div id="sound-wave"></div>
     <div id="response">Готов к работе. Произнесите "Джарвис"...</div>
-    <div id="controls">
-      <button id="close-btn">×</button>
+     <div id="controls" style="position: absolute; top: 10px; right: 10px;">
+        <button id="close-btn" style="background: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px;">×</button>
+      </div>
+        <script>
+          const { ipcRenderer } = require('electron');
+          window.ipcRenderer = ipcRenderer;
+        </script>
+      <script>
+        document.getElementById('close-btn').addEventListener('click', () => {
+          window.ipcRenderer.send('close-window', 'main');
+        });
+</script>
     </div>
   </div>
-  <script src="renderer.js"></script>
+  <script src="renderMain.js"></script>
 </body>
 </html>

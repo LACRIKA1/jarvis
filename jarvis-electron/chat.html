@@ -1,151 +1,81 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charaset="UTF-8">
-    <title>JARVIS Chat</title>
-    <link rel="stylesheet" href="stule.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-    /* Стили для чата */
+  <meta charset="UTF-8">
+  <title>JARVIS Chat</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
     body {
-      background: rgba(10, 10, 20, 0.8);
-      color: #00ff00;
-      font-family: 'Orbitron', sans-serif;
       margin: 0;
       padding: 0;
+      background: rgba(10, 10, 20, 0.9);
+      color: #00ff00;
+      font-family: 'Orbitron', sans-serif;
+      height: 100vh;
       overflow: hidden;
     }
     #chat-container {
-      height: 85vh;
+      height: calc(100vh - 120px);
       padding: 20px;
       overflow-y: auto;
-      border-bottom: 1px solid #00ff00;
     }
     #input-container {
       display: flex;
       padding: 10px;
+      position: fixed;
+      bottom: 0;
+      width: calc(100% - 20px);
+      background: rgba(0, 0, 0, 0.7);
     }
     #user-input {
-      flex-grow: 1;
+      flex: 1;
+      padding: 10px;
       background: rgba(0, 0, 0, 0.5);
       border: 1px solid #00ff00;
       color: #00ff00;
-      padding: 10px;
-      font-family: 'Orbitron', sans-serif;
     }
-    #send-btn, #voice-btn {
-      background: rgba(0, 255, 0, 0.2);
-      border: 1px solid #00ff00;
-      color: #00ff00;
-      margin-left: 10px;
+    #close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ff0000;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
       cursor: pointer;
+      z-index: 1000;
     }
     .message {
       margin-bottom: 15px;
-      line-height: 1.4;
     }
     .user-message {
-      color: #ffffff;
+      color: white;
     }
     .jarvis-message {
       color: #00ff00;
     }
-    #controls {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-    }
-    #close-btn {
-      background: transparent;
-      border: none;
-      color: #ff0000;
-      font-size: 20px;
-      cursor: pointer;
-    }
   </style>
+  <script>
+    const { ipcRenderer } = require('electron')
+    window.ipcRenderer = ipcRenderer
+  </script>
 </head>
 <body>
-  <div id="jarvis-chat">
-    <!-- Кнопка закрытия -->
-    <div id="controls">
-      <button id="close-btn">×</button>
+  <button id="close-btn">×</button>
+  <div id="chat-container">
+    <div class="message jarvis-message">
+      JARVIS: Система активирована. Чем могу помочь?
     </div>
+  </div>
 
-    <!-- История сообщений -->
-    <div id="chat-container">
-      <div class="message jarvis-message">
-        JARVIS: Система активирована. Чем могу помочь?
-      </div>
-    </div>
+  <div id="input-container">
+    <input type="text" id="user-input" placeholder="Введите сообщение...">
+    <button id="send-btn">Отправить</button>
+    <button id="voice-btn">🎤</button>
+  </div>
 
-
-
-  <script>
-    // Подключение Socket.IO
-    const socket = io('http://localhost:5000');
-
-    // Элементы интерфейса
-    const chatContainer = document.getElementById('chat-container');
-    const userInput = document.getElementById('user-input');
-    const sendBtn = document.getElementById('send-btn');
-    const voiceBtn = document.getElementById('voice-btn');
-    const closeBtn = document.getElementById('close-btn');
-
-    // Отправка сообщения
-    function sendMessage() {
-      const message = userInput.value.trim();
-      if (message) {
-        addMessage('Вы', message, 'user-message');
-        socket.emit('user_message', { text: message });
-        userInput.value = '';
-      }
-    }
-
-    // Добавление сообщения в чат
-    function addMessage(sender, text, className) {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `message ${className}`;
-      messageDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
-      chatContainer.appendChild(messageDiv);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-
-    // Голосовой ввод
-    voiceBtn.addEventListener('click', () => {
-      if (!('webkitSpeechRecognition' in window)) {
-        alert('Голосовой ввод не поддерживается в вашем браузере!');
-        return;
-      }
-
-      const recognition = new webkitSpeechRecognition();
-      recognition.lang = 'ru-RU';
-
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        userInput.value = transcript;
-        sendMessage();
-      };
-
-      recognition.start();
-    });
-
-    // Кнопка отправки
-    sendBtn.addEventListener('click', sendMessage);
-
-    // Enter для отправки
-    userInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage();
-    });
-
-    // Закрытие чата
-    closeBtn.addEventListener('click', () => {
-      window.ipcRenderer.send('close-chat');
-    });
-
-    // Получение ответа от JARVIS
-    socket.on('jarvis_message', (data) => {
-      addMessage('JARVIS', data.text, 'jarvis-message');
-    });
-  </script>
+  <script src="renderChat.js"></script>
 </body>
 </html>
