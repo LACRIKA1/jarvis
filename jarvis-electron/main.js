@@ -12,13 +12,23 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
-    }
+    }}
+  )
+  // окно чата
+  chatWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    transparent: true,
+    frame: false,
   })
+
+
 // load html file
   mainWindow.loadFile('index.html')
-
+  chatWindow.loadFile('chat.html')
+  chatWindow.show();
   // Открываем DevTools для отладки (можно убрать)
-  // mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools()
 }
 
 app.whenReady().then(createWindow)
