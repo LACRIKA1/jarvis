@@ -73,7 +73,7 @@ class VoiceAssistant:
         self.engine = pyttsx3.init()
         # ... остальная инициализация
     def check_reset(self):
-        if time.time() - self.last_reset > 3600:  # Каждый час 
+        if time.time() - self.last_reset > 1800:
             os.system('cls' if os.name == 'nt' else 'clear')
             print(f"[DEBUG] Плановый сброс компонентов в {time.strftime('%H:%M:%S')}")
             self.init_components()
@@ -120,7 +120,7 @@ class VoiceAssistant:
                     continue  
                     
                 except Exception as e:
-                    print(f"\n⚠️ Ошибка: {e}")
+                    #print(f"\n⚠️ Ошибка: {e}")
                     continue  
 
 def manage_windows(command):
